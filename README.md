@@ -24,7 +24,7 @@ MATLAB Code Descriptions:
              1. Tau Coordinates (Obtain this by exporting coordinates of original tau channel in FIJI. Should be a .txt file with XYZ and intensity values for each pixel).  
              2. Vessel Data (Coordinates for each blood vessel. Obtain these by loading Imaris vessel masks into FIJI and exporting coordinates for each vessel. Should be .txt files.)  
              3. Distance Transforms (Distance transform for each vessel. Obtain these first in Imaris, then refine with FIJI MACRO to reduce file size. Should be 1 per vessel. Ensure files are named in similar form to the vessel data so they are ordered correctly.)  
-                 
+             
           Values:  
              1. Imaris Image Dimensions in Microns (Includes lower and upper bounds for X, Y, and Z.)  
              2. Fiji Image Dimensions in Pixel Count (Include X dimension, Y dimension, and # of Z-stacks for each input: tau data, vessel data, and distance transform data)  
