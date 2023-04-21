@@ -1,8 +1,8 @@
 %% READ ME
 
 % DATA OUTPUT FORMAT: 
-%      Column: [  1    2    3              4                          5                      6           ]
-%              [  X    Y    Z   MedianNormalizedIntensity    DistanceAlongVessel    DistanceFromSurface  ]
+%      Column: [  1    2    3         4                   5                      6           ]
+%              [  X    Y    Z     Intensity      DistanceAlongVessel    DistanceFromSurface  ]
 
 % IMPORTANT NOTES: 
 % DATA FROM IMAGEJ MUST BE OF THE SAME RESOLUTION LEVEL
@@ -92,20 +92,20 @@ tau_znum = [ 133 ];
 
 dist_znum = [ 133 ];
 
-% Set Moving Average Size
+% Set Moving Average Size (DOES NOT AFFECT EXPORTED DATA)
 Int_moving_ave_size = [  1000  ];
 
 Int_surfplot_moving_ave_size = [  500  ];
 
-% Make test plots? Yes = [1] No = [0]:
+% Make test plots? Yes = [1] No = [0] (DOES NOT AFFECT EXPORTED DATA):
 
 testplot = [  1  ];
 
-% Plot Intensity vs Distance Metrics? Yes = [1] No = [0]:
+% Plot Intensity vs Distance Metrics? Yes = [1] No = [0] (DOES NOT AFFECT EXPORTED DATA):
 
 intdistplots = [  1  ];
 
-% Axes equal for 3D plot? Yes = [1] No = [0]:
+% Axes equal for 3D plot? Yes = [1] No = [0] (DOES NOT AFFECT EXPORTED DATA):
 
 axes = [   1   ];
 
@@ -524,8 +524,7 @@ end
 
 %% Export Data
 f = waitbar(0.9,sprintf('Getting Distances for Vessel %d/%d: Exporting Data',h,k));
-norm_int = Tau_data(:,4)./median(Tau_data(:,4));
-Tau_data = [Tau_data(:,1:3) norm_int  Tau_data(:,5:6)];
+Tau_data = Tau_data(:,1:6);
 final_data = Tau_data;
 ves_num = compose('_%02d', h);
 txt_name = append(folder_dir,'/',final_name,ves_num,'.txt');

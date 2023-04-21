@@ -94,20 +94,20 @@ tau_znum = [ 76 ];
 
 dist_znum = [ 76 ];
 
-% Set Moving Average Size
+% Set Moving Average Size (DOES NOT AFFECT EXPORTED DATA)
 Int_moving_ave_size = [  1000  ];
 
 Int_surfplot_moving_ave_size = [  500  ];
 
-% Make test plots? Yes = [1] No = [0]:
+% Make test plots? Yes = [1] No = [0] (DOES NOT AFFECT EXPORTED DATA):
 
 testplot = [  1  ];
 
-% Plot Intensity vs Distance Metrics? Yes = [1] No = [0]:
+% Plot Intensity vs Distance Metrics? Yes = [1] No = [0] (DOES NOT AFFECT EXPORTED DATA):
 
 intdistplots = [  1  ];
 
-% Axes equal for 3D plot? Yes = [1] No = [0]:
+% Axes equal for 3D plot? Yes = [1] No = [0] (DOES NOT AFFECT EXPORTED DATA):
 
 axes = [   1   ];
 
