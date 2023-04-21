@@ -166,7 +166,15 @@ end
 endrow = length(new_data(:,1));
 %binned_data = {};
 end
+%% Headers
+intensity_headers = [min_dist:ves_dist];
+intensity_headerstemp = {};
+for i = 1:length(intensity_headers)
+    intensity_headerstemp(:,i) = {append(sprintf('%g',intensity_headers(1,i)),' um Density')};
+end
+intensity_headers = intensity_headerstemp;
+headers = cell2table({ 'Vessel#'  'Frame#'  'MinFrameDistance' 'MaxFrameDistance' intensity_headers{:}});
 
-%% Save Data
-writematrix(new_data,append(outputfoldername,'/',outputname,'.txt'));
-xlswrite(append(outputfoldername,'/',outputname),new_data);
+%% Save Data (Add header export in separate file)
+writetable(headers,append(outputfoldername,'\',outputname,'_HEADERS.csv'));
+csvwrite(append(outputfoldername,'\',outputname,'.csv'),new_data);
