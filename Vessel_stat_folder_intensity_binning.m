@@ -1,7 +1,6 @@
 clc; clear all; close all;
 
-% Exported Data Format: [ Vessel#  Frame#  MinFrameDistance
-% MaxFrameDistance MeanIntensityForEachDistanceFromVessel  ]
+% Exported Data Format: [ Vessel#  Frame#  MinFrameDistance MaxFrameDistance MeanIntensityForEachDistanceFromVessel  ]
 
 %% Import Data
 
@@ -9,9 +8,6 @@ clc; clear all; close all;
 
 % Input data folder name (INCLUDE FOLDER PATH AND NAME):
 sourcefolder = '/Users/zacharyhoglund/Documents/test data';
-
-% Set Moving Average Size (Recommended Value: 50):
-Int_moving_ave_size = [  50  ];
 
 % Max Distance From Vessel (in microns) (Recommended Value 30):
 
