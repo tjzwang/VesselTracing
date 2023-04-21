@@ -2,15 +2,15 @@
   
 Protocol:   
 1. Calculate the intensity of objects or pixels along the length of blood vessels  
-   Files:  
-     intensity_distance_analysis_NEW.m (Use this file if data is correctly oriented. You can check orientation of data by looking at figures that appear. In figure 4, the red vessel should be visible inside the blue tau data) 
+       Files:  
+         intensity_distance_analysis_NEW.m (Use this file if data is correctly oriented. You can check orientation of data by looking at figures that appear. In figure 4, the red vessel should be visible inside the blue tau data) 
        
      intensity_distance_analysis_NEW_FLIPPED.m (Use if vessel is not inside tau data. This script flips data to reorient the vessel correctly. Check figure 4 to ensure flipping fixed the misalignment.)  
     
 2. Bin data along and away from vessel:  
-   Files:  
-      For Intensity: Vessel_stat_folder_intensity_binning.m  
-      For Objects: Vessel_stat_folder_object_binning.m  
+      Files:  
+         For Intensity: Vessel_stat_folder_intensity_binning.m  
+         For Objects: Vessel_stat_folder_object_binning.m  
   
 NOTE: The folder "Necessary Functions" must be added to the path for scripts to run!  
   
