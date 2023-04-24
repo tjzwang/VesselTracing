@@ -1,7 +1,7 @@
 # VesselTracing
   
 Protocol:   
-1. Calculate the intensity of objects or pixels along the length of blood vessels  
+1. Calculate the distance of objects or pixels along the length of and away from blood vessels  
        Files:  
          intensity_distance_analysis_NEW.m (Use this file if data is correctly oriented. You can check orientation of data by looking at figures that appear. In figure 4, the red vessel should be visible inside the blue tau data) 
        
