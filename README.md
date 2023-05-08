@@ -79,5 +79,9 @@ MATLAB Code Descriptions:
    
 5. Necessary Functions  
      This folder contains functions necessary for the other scripts to run. These functions must be added to the path of the script before running.   
-          
+
+
+
+KNOWN ISSUES: 
+1. Object binning script density calculation is incorrect. 
       
