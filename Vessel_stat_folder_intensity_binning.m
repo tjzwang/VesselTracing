@@ -108,7 +108,7 @@ for i = frame_w:frame_w:(ceil(max(Tau_data(:,5)/frame_w))*frame_w)
     
     idx = find(Tau_data(:,5) < i & Tau_data(:,5) >= (i - frame_w));
      %  [b g (i - frame_w) i Tau_data(idx,:)]
-     if length(idx)>=1
+     if ~isempty(idx)
      for d = 1:length(idx)
     binned_data{g}(d,:) = [b g (i - frame_w) i (Tau_data(idx(d),:))];
      end
@@ -116,6 +116,8 @@ for i = frame_w:frame_w:(ceil(max(Tau_data(:,5)/frame_w))*frame_w)
         binned_data{g}(d,:) = [b g (i - frame_w) i zeros(1,length(Tau_data(1,:)))];
      end
     g = g+1;
+    idx = [];
+    d = 1;
 
 end
 
@@ -174,5 +176,9 @@ intensity_headers = intensity_headerstemp;
 headers = cell2table({ 'Vessel#'  'Frame#'  'MinFrameDistance' 'MaxFrameDistance' intensity_headers{:}});
 
 %% Save Data (Add header export in separate file)
-writetable(headers,append(outputfoldername,'\',outputname,'_HEADERS.csv'));
-csvwrite(append(outputfoldername,'\',outputname,'.csv'),new_data);
+writetable(headers,append(outputfoldername,'/',outputname,'_HEADERS.csv'));
+csvwrite(append(outputfoldername,'/',outputname,'.csv'),new_data);
+
+
+
+

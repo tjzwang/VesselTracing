@@ -6,8 +6,11 @@ clc; clear all; close all;
 
 % .txt file (Recommended for speed):
 
-% Input data folder name (INCLUDE FOLDER PATH AND NAME):
-sourcefolder = '/Users/zacharyhoglund/Documents/test data';
+% Input tau data folder name (INCLUDE FOLDER PATH AND NAME):
+Tau_sourcefolder = '/Users/zacharyhoglund/Documents/test data';
+
+% Input distance transform data folder name for volume calculation (INCLUDE FOLDER PATH AND NAME):
+Distance_sourcefolder = '/Users/zacharyhoglund/Documents/test data';
 
 % Max Distance From Vessel (in microns) (Recommended Value 30):
 
@@ -26,6 +29,10 @@ frame_w = [ 10 ];
 % Distance to define surface data (in microns)? (Recommended Value: 3):
 
 surf_d = [ 3 ];
+
+% Voxel Size
+
+voxel = ???;
 
 % Data Output Name (True, unshuffled data only) (Include Name + Path):
 % Vessel number and data type will be appended, so do not include in names.
@@ -48,18 +55,17 @@ nbins_length = 5;
 
 f = waitbar(0,'Calculating Statistics: Reading Data 0 %');
 
-fcontent = dir(fullfile(sourcefolder, '*.txt')); %fcontent is a column vector of structures
+fcontent = dir(fullfile(Tau_sourcefolder, '*.txt')); %fcontent is a column vector of structures
 
 l1 = 1;
 
-% Open files and load data from folder
-% If multiple files exist, their data will be stacked
-
 Tau_data = [];
+
+Distance_data = [];
 
 n = length(fcontent');
 
-b = 1;
+%b = 1;
 
 for b = 1:n
     sizes = [];
@@ -77,7 +83,7 @@ for i = n1:n2
 
    filename = fcontent(i).name;
    Tau_data_single = [];
-   Tau_data_single = readmatrix(fullfile(sourcefolder,filename));
+   Tau_data_single = readmatrix(fullfile(Tau_sourcefolder,filename));
    [r, c] = size(Tau_data_single);
    l2 = l1 + r - 1;
    Tau_data(l1:l2,:) = Tau_data_single;
@@ -98,6 +104,40 @@ Tau_data(idx,:) = [];
 idx = find(Tau_data(:,6) > ves_dist );
 Tau_data(idx,:) = [];
 
+
+% Read Distance Data
+
+fcontent = dir(fullfile(Distance_sourcefolder, '*.txt')); %fcontent is a column vector of structures
+
+l1 = 1;
+
+for i = n1:n2
+
+%i = 7;
+
+   filename = fcontent(i).name;
+   Distance_data_single = [];
+   Distance_data_single = readmatrix(fullfile(Distance_sourcefolder,filename));
+   [r, c] = size(Distance_data_single);
+   l2 = l1 + r - 1;
+   Distance_data(l1:l2,:) = Distance_data_single;
+   l1 = 1;
+
+    waitbar(0,f,sprintf('Calculating Statistics: Reading Data %d %%',floor(i/n*100)));
+
+end
+
+
+waitbar(0.1,f,'Calculating Statistics: Preparing Data');
+
+% Remove data where Tau is within blood vessel and greater than ves_dist
+% away
+Distance_data_backup = Distance_data;
+idx = find( Distance_data(:,6) <= min_dist);
+Distance_data(idx,:) = [];
+idx = find(Distacne_data(:,6) > ves_dist );
+Distance_data(idx,:) = [];
+
 %% Bin Data by Surface Frames
 
 % b = vessel ID    g = frame ID
@@ -106,14 +146,24 @@ g = 1;
 for i = frame_w:frame_w:(ceil(max(Tau_data(:,5)/frame_w))*frame_w)
     
     idx = find(Tau_data(:,5) < i & Tau_data(:,5) >= (i - frame_w));
+    idx2 = find(Distance_data(:,5) < i & Distance_data(:,5) >= (i - frame_w));
      %  [b g (i - frame_w) i Tau_data(idx,:)]
      if length(idx)>=1
      for d = 1:length(idx)
-    binned_data{g}(d,:) = [b g (i - frame_w) i (Tau_data(idx(d),:))];
+    Tau_binned_data{g}(d,:) = [b g (i - frame_w) i (Tau_data(idx(d),:))];
      end
         else
-        binned_data{g}(d,:) = [b g (i - frame_w) i zeros(1,length(Tau_data(1,:)))];
+        Tau_binned_data{g}(d,:) = [b g (i - frame_w) i zeros(1,length(Tau_data(1,:)))];
      end
+
+      if length(idx2)>=1
+     for d = 1:length(idx2)
+    Dist_binned_data{g}(d,:) = [b g (i - frame_w) i (Distance_data(idx(d),:))];
+     end
+        else
+        Dist_binned_data{g}(d,:) = [b g (i - frame_w) i zeros(1,length(Distance_data(1,:)))];
+     end
+
     g = g+1;
 
 end
@@ -128,7 +178,9 @@ new_data = [new_data;zeros(length(binned_data),((ves_dist-min_dist)+5))];
 
 for i = 1:length(binned_data)
 
-   single_bin_data = binned_data{i};
+   Tau_single_bin_data = Tau_binned_data{i};
+
+   Dist_single_bin_data = Dist_binned_data{i};
   
    if ~isempty(single_bin_data)
    new_data(endrow+i,1:4) = single_bin_data(1,1:4);
@@ -140,19 +192,20 @@ for i = 1:length(binned_data)
        dist_min = d+min_dist-0.5;
        dist_max = d+min_dist+res-0.5;
        if d == 0
-       idx = find(single_bin_data(:,10) >= dist_min & single_bin_data(:,10)<= dist_max);
-       mean_int = mean(single_bin_data(idx,8));
-       if ~isnan(mean_int) 
-       volume = length(idx)/((pi*(dist_max)^2 - pi*(dist_min)^2)*frame_w);
+       idx = find(Tau_single_bin_data(:,10) >= dist_min & Tau_single_bin_data(:,10)<= dist_max);
+       idx2 = find(Dist_single_bin_data(:,10) >= dist_min & Dist_single_bin_data(:,10)<= dist_max);
+
+       if ~isempty(idx) 
+       volume = length(idx2)*voxel;
        density = length(idx)/volume;
        new_data(i,d+4) = density;
        end
 
        else
-       idx = find(single_bin_data(:,10) > d+min_dist-0.5 & single_bin_data(:,10)<= dist_max);
-       mean_int = mean(single_bin_data(idx,8));
-       if ~isnan(mean_int) 
-       volume = ((pi*(dist_max)^2 - pi*(dist_min)^2)*frame_w);
+       idx = find(Tau_single_bin_data(:,10) > d+min_dist-0.5 & Tau_single_bin_data(:,10)<= dist_max);
+       idx2 = find(Dist_single_bin_data(:,10) > d+min_dist-0.5 & Dist_single_bin_data(:,10)<= dist_max);
+       if ~isempty(idx) 
+       volume = length(idx2)*voxel;
        density = length(idx)/volume;
        new_data(i,d+4) = density;
        end
@@ -166,15 +219,19 @@ end
 endrow = length(new_data(:,1));
 %binned_data = {};
 end
+
 %% Headers
 intensity_headers = [min_dist:ves_dist];
 intensity_headerstemp = {};
 for i = 1:length(intensity_headers)
-    intensity_headerstemp(:,i) = {append(sprintf('%g',intensity_headers(1,i)),' um Density')};
+    intensity_headerstemp(:,i) = {append(sprintf('%g',intensity_headers(1,i)),' um MeanIntensity')};
 end
 intensity_headers = intensity_headerstemp;
 headers = cell2table({ 'Vessel#'  'Frame#'  'MinFrameDistance' 'MaxFrameDistance' intensity_headers{:}});
 
 %% Save Data (Add header export in separate file)
-writetable(headers,append(outputfoldername,'\',outputname,'_HEADERS.csv'));
-csvwrite(append(outputfoldername,'\',outputname,'.csv'),new_data);
+writetable(headers,append(outputfoldername,'/',outputname,'_HEADERS.csv'));
+csvwrite(append(outputfoldername,'/',outputname,'.csv'),new_data);
+
+
+
