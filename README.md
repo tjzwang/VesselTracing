@@ -10,7 +10,8 @@ Protocol:
 2. Bin data along and away from vessel:  
       Files:  
          For Intensity: Vessel_stat_folder_intensity_binning.m  
-         For Objects: Vessel_stat_folder_object_binning.m  
+         For Objects: Vessel_stat_folder_object_binning.m
+         To get volumes for object analysis: intensity_distance_analysis_for_volume.m
   
 NOTE: The folder "Necessary Functions" must be added to the path for scripts to run!  
   
@@ -64,7 +65,8 @@ MATLAB Code Descriptions:
       Bins object data in groups based on distance along the vessel and distance away from the vessel. 
       
       Inputs: 
-          1. Folder containing files with calculated object distances along and away from each blood vessel (Outputs from intensity_distance_analysis_NEW.m)  
+          1. Folder containing files with calculated object distances along and away from each blood vessel (Outputs from intensity_distance_analysis_NEW.m)
+          2. Folder containing files with calculated pixels distances of the distance transforms along and away from each blood vessel (Outputs from intensity_distance_analysis_for_volume.m)    
              
      Values:   
           1. Max Distance From Vessel (in microns)  
@@ -76,12 +78,27 @@ MATLAB Code Descriptions:
       Column: [    1        2            3                4                5-(Max Distance From Vessel - Min Distance From Vessel  ]  
               [ Vessel#  Frame#  MinFrameDistance    MaxFrameDistance           (Density For Each Distance From Vessel)            ]  
       Data exports as a .csv  
+      
+      
+5. intensity_distance_analysis_for_volume.m
+    This file calculates the distance away and along blood vessels for distance transform pixels. This allows for the volume and subsequent density calculation during object analysis in Vessel_stat_folder_object_binning.m. 
+      Inputs:  
+          Data:  
+             1. Vessel Data (Coordinates for each blood vessel. Obtain these by loading Imaris vessel masks into FIJI and exporting coordinates for each vessel. Should be .txt files.)  
+             2. Distance Transforms (Distance transform for each vessel. Obtain these first in Imaris, then refine with FIJI MACRO to reduce file size. Should be 1 per vessel. Ensure files are named in similar form to the vessel data so they are ordered correctly.)  
+             
+          Values:  
+             1. Imaris Image Dimensions in Microns (Includes lower and upper bounds for X, Y, and Z.)  
+             2. Fiji Image Dimensions in Pixel Count (Include X dimension, Y dimension, and # of Z-stacks for each input: vessel data and distance transform data)  
+             3. Export path, name, and file type for exported data files. (.txt is recommended)  
+               
+      Output Format:  
+       Column: [  1    2    3         4                  5                      6           ]  
+               [  X    Y    Z     Intensity     DistanceAlongVessel    DistanceFromSurface  ]
+       Data exports as .txt or .xlsx (.txt is recommended)  
    
-5. Necessary Functions  
+6. Necessary Functions  
      This folder contains functions necessary for the other scripts to run. These functions must be added to the path of the script before running.   
 
 
-
-KNOWN ISSUES: 
-1. Object binning script density calculation is incorrect. 
       
