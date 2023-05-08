@@ -32,7 +32,8 @@ surf_d = [ 3 ];
 
 % Voxel Size
 
-voxel = ???;
+% Voxel Size:  [   X    Y   Z   ]
+voxel =        [ 0.32 0.32 1.75 ];
 
 % Data Output Name (True, unshuffled data only) (Include Name + Path):
 % Vessel number and data type will be appended, so do not include in names.
@@ -41,7 +42,8 @@ voxel = ???;
 % stat_data_errors if stat_data is the folder name.
 
 % Folder:
-outputfoldername = 'C:\Users\zh624\Desktop\AD Blood Vessel Tracing\Human2302\Stat_data_imp_fit_ind_Percent';
+outputfoldername = '/Users/zacharyhoglund/Documents/test data output';
+
 % File:
 outputname = 'Human2302_Tau_obj_test_data';
 
@@ -135,36 +137,31 @@ waitbar(0.1,f,'Calculating Statistics: Preparing Data');
 Distance_data_backup = Distance_data;
 idx = find( Distance_data(:,6) <= min_dist);
 Distance_data(idx,:) = [];
-idx = find(Distacne_data(:,6) > ves_dist );
+idx = find(Distance_data(:,6) > ves_dist );
 Distance_data(idx,:) = [];
 
 %% Bin Data by Surface Frames
 
 % b = vessel ID    g = frame ID
-frame_data = zeros(ceil(max(Tau_data(:,5)/frame_w)),3);
+
 g = 1;
 for i = frame_w:frame_w:(ceil(max(Tau_data(:,5)/frame_w))*frame_w)
     
     idx = find(Tau_data(:,5) < i & Tau_data(:,5) >= (i - frame_w));
     idx2 = find(Distance_data(:,5) < i & Distance_data(:,5) >= (i - frame_w));
      %  [b g (i - frame_w) i Tau_data(idx,:)]
-     if length(idx)>=1
+     if ~isempty(idx)
      for d = 1:length(idx)
     Tau_binned_data{g}(d,:) = [b g (i - frame_w) i (Tau_data(idx(d),:))];
+    Distance_binned_data{g}(d,:) = [b g (i - frame_w) i (Distance_data(idx(d),:))];
      end
         else
         Tau_binned_data{g}(d,:) = [b g (i - frame_w) i zeros(1,length(Tau_data(1,:)))];
+        Distance_binned_data{g}(d,:) = [b g (i - frame_w) i zeros(1,length(Distance_data(1,:)))];
      end
-
-      if length(idx2)>=1
-     for d = 1:length(idx2)
-    Dist_binned_data{g}(d,:) = [b g (i - frame_w) i (Distance_data(idx(d),:))];
-     end
-        else
-        Dist_binned_data{g}(d,:) = [b g (i - frame_w) i zeros(1,length(Distance_data(1,:)))];
-     end
-
     g = g+1;
+    idx = [];
+    d = 1;
 
 end
 
@@ -174,40 +171,39 @@ if b == 1;
     new_data = [];
     endrow = 0;
 end
-new_data = [new_data;zeros(length(binned_data),((ves_dist-min_dist)+5))];
+new_data = [new_data;zeros(length(Tau_binned_data),((ves_dist-min_dist)+5))];
 
-for i = 1:length(binned_data)
+for i = 1:length(Tau_binned_data)
 
    Tau_single_bin_data = Tau_binned_data{i};
-
-   Dist_single_bin_data = Dist_binned_data{i};
+   Distance_single_bin_data = Distance_binned_data{i};
   
-   if ~isempty(single_bin_data)
-   new_data(endrow+i,1:4) = single_bin_data(1,1:4);
+   if ~isempty(Tau_single_bin_data)
+   new_data(endrow+i,1:4) = Tau_single_bin_data(1,1:4);
    else
    new_data(endrow+i,1:4) = [b    i   new_data(endrow+i-1,3)+frame_w      new_data(endrow+i-1,4)+frame_w];
    end
 
-   for d = 0:(ves_dist-min_dist)
+   for d = 0:res:(ves_dist-min_dist)
        dist_min = d+min_dist-0.5;
        dist_max = d+min_dist+res-0.5;
        if d == 0
-       idx = find(Tau_single_bin_data(:,10) >= dist_min & Tau_single_bin_data(:,10)<= dist_max);
-       idx2 = find(Dist_single_bin_data(:,10) >= dist_min & Dist_single_bin_data(:,10)<= dist_max);
-
+       idx = find(Tau_single_bin_data(:,10) >= dist_min & Tau_single_bin_data(:,10) <= dist_max);
+       idx2 = find(Distance_single_bin_data(:,10) >= dist_min & Distance_single_bin_data(:,10) <= dist_max);
        if ~isempty(idx) 
-       volume = length(idx2)*voxel;
+       volume = length(idx2)*(voxel(1)*voxel(2)*voxel(3));
        density = length(idx)/volume;
        new_data(i,d+4) = density;
+       new_data(endrow+i,d+5) = density;
        end
 
        else
        idx = find(Tau_single_bin_data(:,10) > d+min_dist-0.5 & Tau_single_bin_data(:,10)<= dist_max);
-       idx2 = find(Dist_single_bin_data(:,10) > d+min_dist-0.5 & Dist_single_bin_data(:,10)<= dist_max);
+       idx2 = find(Distance_single_bin_data(:,10) > d+min_dist-0.5 & Distance_single_bin_data(:,10)<= dist_max);
        if ~isempty(idx) 
-       volume = length(idx2)*voxel;
+       volume = length(idx2)*(voxel(1)*voxel(2)*voxel(3));
        density = length(idx)/volume;
-       new_data(i,d+4) = density;
+        new_data(endrow+i,d+5) = density;
        end
 
        end
