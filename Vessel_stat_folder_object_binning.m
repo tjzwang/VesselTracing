@@ -220,7 +220,7 @@ end
 intensity_headers = [min_dist:ves_dist];
 intensity_headerstemp = {};
 for i = 1:length(intensity_headers)
-    intensity_headerstemp(:,i) = {append(sprintf('%g',intensity_headers(1,i)),' um Density')};
+    intensity_headerstemp(:,i) = {append(sprintf('%g',intensity_headers(1,i)),' um Density (#/um^3)')};
 end
 intensity_headers = intensity_headerstemp;
 headers = cell2table({ 'Vessel#'  'Frame#'  'MinFrameDistance' 'MaxFrameDistance' intensity_headers{:}});
