@@ -13,7 +13,8 @@ Protocol:
          For Objects: Vessel_stat_folder_object_binning.m
          To get volumes for object analysis: intensity_distance_analysis_for_volume.m
   
-NOTE: The folder "Necessary Functions" must be added to the path for scripts to run!  
+NOTE: The folder "Necessary Functions" must be added to the path for scripts to run!
+NOTE: All files must start in the format sampleID_Vessel_vesselID_. The file name can vary after the final underscore, ex. "Human2267_Vessel_3_DT". Failure to follow this format will result in errors, as sample and vessel IDs are extracted from the original file name. 
   
 MATLAB Code Descriptions:  
   
