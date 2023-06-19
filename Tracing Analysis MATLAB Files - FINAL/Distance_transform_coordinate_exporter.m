@@ -40,7 +40,7 @@ f = waitbar(0,sprintf('Reading image for vessel 1/%d',k));
 
 for h = 1:k
 
-% Import vessel data
+% Import distance transform data
 
 waitbar(0,f,sprintf('Reading image for vessel %d/%d',h,k));
 dist_fcontent = dir(fullfile(distance_folder, '*.tif')); %fcontent is a column vector of structures
