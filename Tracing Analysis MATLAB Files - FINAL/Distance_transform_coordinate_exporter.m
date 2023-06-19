@@ -24,8 +24,17 @@ folder_dir = 'C:\Users\zh624\Desktop\AD Blood Vessel Tracing\Human2302\Intensity
 
 
 %%
-fcontent = dir(fullfile(distance_folder, '*.tif')); %fcontent is a column vector of structures
+fcontent = dir(fullfile(distance_folder, '*.tif'));
+
+if length(fcontent') == 0
+    fcontent =  dir(fullfile(distance_folder, '*.tiff'));
+end
+
 k = length(fcontent');
+
+if k == 0
+    error('ERROR: Distance transform folder is empty');
+end
 
 f = waitbar(0,sprintf('Reading image for vessel 1/%d',k));
 
