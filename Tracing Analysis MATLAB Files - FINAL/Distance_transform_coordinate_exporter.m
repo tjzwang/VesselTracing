@@ -87,8 +87,8 @@ elseif yesno(2) == 1
 writematrix(distance_data,xlsx_name);
 end
 
-%clear distance_image
-%clear distance_data
+clear distance_image
+clear distance_data
 
 end
 
