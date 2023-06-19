@@ -1,5 +1,10 @@
 %%
 clc; close all; clear all;
+
+%% Exported Data format:
+% Column:     1  2  3     4
+%           [ X  Y  Z  Distance ]
+
 %% IMPORT DATA/SETTINGS
 
 % DISTANCE TRANSFORM Images (must be .tiff):
@@ -15,7 +20,7 @@ yesno = [    0       0    ];
 
 folder_dir = 'C:\Users\zh624\Desktop\AD Blood Vessel Tracing\Human2302\Intensity_distance_data';
 
-% Data files will be exported as Human####_Vessel_##_int_dist_data
+% Data files will be exported as Human####_Vessel_##_DT_COORD
 
 
 %%
