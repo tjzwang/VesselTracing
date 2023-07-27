@@ -1,9 +1,8 @@
-clc; close all; clear all;
 %% READ ME
 
 % DATA OUTPUT FORMAT: 
 %      Column: [  1    2    3         4                   5                      6           ]
-%              [  X    Y    Z     Intensity      DistanceAlongVessel    DistanceFromSurface  ]
+%              [  X    Y    Z     Intensity       DistanceAlongVessel    DistanceFromSurface ]
 
 % IMPORTANT NOTES: 
 % DATA FROM IMAGEJ MUST BE OF THE SAME RESOLUTION LEVEL
@@ -13,9 +12,32 @@ clc; close all; clear all;
 
 %% IMPORT DATA/SETTINGS
 
-% VESSEL DISTANCE TRANSFORM, CORTICAL, and INTENSITY COORDINATES:
+clc; clear all; close all;
 
-distance_folder = 'C:\Users\exx\Desktop\Zach - Active Analysis\2477\FINAL_coordinates';
+tic
+
+% INPUT FOLDER NAMES + PATH (ex. (ex. '/Users/zacharyhoglund/Desktop/Human2131/Vessel_Data')
+
+% Objext DATA (.csv):
+
+obj_folder = 'C:\Users\exx\Desktop\Zach - Active Analysis\2364_info';
+
+obj_file = readtable("Human2364Tau_table.csv");
+
+fieldnames(obj_file);
+
+X = obj_file.('CenterOfTheObject_0');
+Y = obj_file.('CenterOfTheObject_1');
+Z = obj_file.('CenterOfTheObject_2');
+
+
+% Object Type (ex. 'tangles' or 'neurons')
+
+obj_type = 'tangles';
+
+% VESSEL DISTANCE TRANSFORMS:
+
+distance_folder = 'C:\Users\exx\Desktop\Zach - Active Analysis\Human2267\DT_coord_hi_res';
 
 % Input Imaris Image Dimentions (Get this from Edit -> Image Properties)
 
@@ -25,7 +47,7 @@ xlow = [ 0 ];
 
 % X-axis upper bound (in microns):
 
-xup = [ 2458 ];
+xup = [ 2454 ];
 
 % Y-axis lower bound (in microns):
 
@@ -33,54 +55,81 @@ ylow = [ 0 ];
 
 % Y-axis upper bound (in microns):
 
-yup = [ 3644 ];
+yup = [ 2444 ];
 
 % Z-axis lower bound (in microns):
 
-zlow = [ 3719 ];
+zlow = [ 430 ];
 
 % Z-axis upper bound (in microns):
 
-zup = [ 4051 ];
+zup = [ 853 ];
 
 % Fiji Image Dimensions:
 
+% Tau X dimension:
+
+tau_xdim = [ 3949 ];
+
 % Distance Transform X dimension:
 
-dist_xdim = [ 3956 ];
+dist_xdim = [ 3949 ];
+
+% Tau Y dimension:
+
+tau_ydim = [ 3934 ];
 
 % Distance Transform Y dimension:
 
-dist_ydim = [ 5897 ];
+dist_ydim = [ 3934 ];
+
+% Number of Tau z-stack slices:
+
+tau_znum = [ 169 ];
 
 % Number of Distance Transform  z-stack slices:
 
-dist_znum = [ 84 ];
+dist_znum = [ 169 ];
 
 % Save final data? What Format? Yes = [1]  No = [0]  (.txt only is recommended)
 
 %       [  .txt    .xlsx  ]
 yesno = [    1       0    ];
 
-% Folder path for tau intensity output (ex. '/Users/zacharyhoglund/Desktop'):
+% Folder path for output (ex. '/Users/zacharyhoglund/Desktop'):
 
-folder_dir = 'C:\Users\exx\Desktop\Zach - Active Analysis\2477\Intensity_distance_data';
+folder_dir = 'C:\Users\exx\Desktop\Zach - Active Analysis\Human2267\Tangle_distance_data';
 
+% Adjusted Data Export Name? (DO NOT INCLUDE FILE TYPE OR VESSEL NUMBER!)
+% ex. Human2131_int_dist_data
+% Vessel number will be appended to file name (ex.
+% Human2131_int_dist_data_1)
 
-% Folder path for tau vessel cortical layer output (ex. '/Users/zacharyhoglund/Desktop'):
-
-folder_dir2 = 'C:\Users\exx\Desktop\Zach - Active Analysis\2477\vessel_cortical_data';
-
-% Data files will be exported as Human####_Vessel_##_int_dist_data
+final_name =  '2699_tangle_distance_data' ;
 
 
 %%
 fcontent = dir(fullfile(distance_folder, '*.txt')); %fcontent is a column vector of structures
+
 k = length(fcontent');
 
 f = waitbar(0,'Reading Tau Data');
 
 for h = 1:k
+
+waitbar(0,f,'Reading Tau Data');
+fcontent = dir(fullfile(obj_folder, '*.csv')); %fcontent is a column vector of structures
+
+sourcefolder = obj_folder;
+
+n = length(fcontent');
+
+   filename = fcontent(1).name;
+   Tau_data_single = [];
+   Tau_data_single = readmatrix(fullfile(sourcefolder,filename));
+   Tau_data = [round(Tau_data_single(:,obj_col(1):obj_col(3))) Tau_data_single(:,1)];
+
+Tau_data_orig = Tau_data;
 
 % Import distance transform data
 
@@ -89,24 +138,43 @@ fcontent = dir(fullfile(distance_folder, '*.txt')); %fcontent is a column vector
 
 sourcefolder = distance_folder;
 
-Distance_data = {};
+n = length(fcontent');
 
    filename = fcontent(h).name;
    distance_data_single = [];
-   Distance_data = readmatrix(fullfile(sourcefolder,filename));
+   distance_data_single = readmatrix(fullfile(sourcefolder,filename));
+   Distance_data = distance_data_single;
 
-Distance_data_orig = Distance_data;
-Tau_data = [Distance_data(:,1:3) Distance_data(:,6) zeros(length(Distance_data(:,1)),1) Distance_data(:,4)];
-Distance_data = [Distance_data(:,1:5)];
-% k = 1;
-% h = 1;
+
+% % k = 1;
+% % h = 1;
 
 waitbar(0,f,sprintf('Getting Distances for Vessel %d/%d: Preparing Data',h,k));
 
+new_Tau_data = Tau_data;
+
+C = find(~ismember(Tau_data(:,1:3),Distance_data(:,1:3),'rows'));
+
+new_Tau_data(C,:) = [];
+
+C = find(~ismember(Distance_data(:,1:3),Tau_data(:,1:3),'rows'));
+
+Distance_data(C,:) = [];
 
 %%
 
-n = length(Tau_data(:,1));
+n = length(new_Tau_data(:,1));
+new_Tau_data = sortrows(new_Tau_data,1);
+new_Tau_data = sortrows(new_Tau_data,2);
+new_Tau_data = sortrows(new_Tau_data,3);
+Distance_data = sortrows(Distance_data,1);
+Distance_data = sortrows(Distance_data,2);
+Distance_data = sortrows(Distance_data,3);
+
+new_Tau_data(:,4) = Distance_data(:,4);
+
+Tau_data = new_Tau_data;
+
 
 %%
 % 
@@ -114,25 +182,21 @@ n = length(Tau_data(:,1));
 % tau_ydim = max(Tau_data(:,2));
 % tau_znum = max(Tau_data(:,3));
 
-Tau_data(:,1) = ((Tau_data(:,1)./dist_xdim).*(xup - xlow))+xlow;
+
+Tau_data(:,1) = ((Tau_data(:,1)./tau_xdim).*(xup - xlow))+xlow;
 Distance_data(:,1) = ((Distance_data(:,1)./dist_xdim).*(xup - xlow))+xlow;
 
-Tau_data(:,2) = ((Tau_data(:,2)./dist_ydim).*(yup - ylow))+ylow;
+Tau_data(:,2) = ((Tau_data(:,2)./tau_ydim).*(yup - ylow))+ylow;
 Distance_data(:,2) = ((Distance_data(:,2)./dist_ydim).*(yup - ylow))+ylow;
 
-Tau_data(:,3) = ((Tau_data(:,3)./dist_znum).*(zup - zlow))+zlow;
+Tau_data(:,3) = ((Tau_data(:,3)./tau_znum).*(zup - zlow))+zlow;
 Distance_data(:,3) = ((Distance_data(:,3)./dist_znum).*(zup - zlow))+zlow;
 
-%% create vessel data:
+% create vessel data:
 
 vessel_idx = find(Distance_data(:,4) <= 0);
-
-vessel_data = Distance_data(vessel_idx,:);
-
-
 %%
-
-
+vessel_data = Distance_data(vessel_idx,:);
 %% Find Line of best fit equation and dataset 
 waitbar(0.1,f,sprintf('Getting Distances for Vessel %d/%d: Finding Line of Best Fit',h,k));
 
@@ -319,13 +383,6 @@ grid on
 colormap(jet)
 title(sprintf('Centerline Plot: Vessel %g',vesnum));
 
-%%
-% figure()
-% scatter3(Tau_data(:,1),Tau_data(:,2),Tau_data(:,3),'MarkerFaceAlpha',0.1,'MarkerEdgeAlpha',0.1);
-% hold on
-% scatter3(vessel_data(:,1),vessel_data(:,2),vessel_data(:,3));
-% title('Tau + Vessel Plot');
-
 %% Find Tau distance along Blood Vessel
 %waitbar(0.4,f,sprintf('Getting Distances for Vessel %d/%d: Finding Distance Along Vessel',h,k));
 % Create matrix for distance along vessel
@@ -337,7 +394,7 @@ near = knnsearch(fitdata(:,1:3),Tau_data(:,1:3),Distance="fasteuclidean");
 
 % Calculate arclength between the end of the best fit line and each nearest
 % point on the best fit line to get distance along the vessel. 
-parfor i = 1:length(Tau_data)
+parfor i = 1:length(Tau_data(:,1))
     if length(fitdata(1:near(i,:),1)) == 1
         Tau_data(i,5) = [0];
     else
@@ -351,50 +408,39 @@ end
 % Sort tau dataset by distance down the vessel for plotting. 
 Tau_data = sortrows(Tau_data,5);
 
-%% Find Cortical Layer distance along Blood Vessel
-%waitbar(0.4,f,sprintf('Getting Distances for Vessel %d/%d: Finding Distance Along Vessel',h,k));
-% Create matrix for distance along vessel
-dist = zeros(length(Tau_data),1);
-
-% Find the nearest point in the best fit line dataset to each point in the
-% tau dataset. 
-near = knnsearch(fitdata(:,1:3),vessel_data(:,1:3),Distance="euclidean");
-
-% Calculate arclength between the end of the best fit line and each nearest
-% point on the best fit line to get distance along the vessel. 
-parfor i = 1:length(vessel_data)
-    if length(fitdata(1:near(i,:),1)) == 1
-        vessel_data(i,6) = [0];
-    else
-    % Calculate arclength
-    dist(i,:) = arclength(fitdata(1:near(i,:),1),fitdata(1:near(i,:),2),fitdata(1:near(i,:),3));
-    % Store distance data in new column of tau dataset. 
-    vessel_data(i,6) = dist(i,:);
-    end
-end
-
-% Sort vessel dataset by distance down the vessel for plotting. 
-vessel_data = sortrows(vessel_data,6);
 
 %% Export Data
 waitbar(0.9,f,sprintf('Getting Distances for Vessel %d/%d: Exporting Data',h,k));
-
+% % norm_int = Tau_data(:,4)./median(Tau_data(:,4));
+% % Tau_data = [Tau_data(:,1:3) norm_int  Tau_data(:,5:6)];
 fcontent = dir(fullfile(distance_folder, '*.txt')); %fcontent is a column vector of structures
 filename = fcontent(h).name;
 [pathstr,name,ext] = fileparts(filename);
 
 name_parts = regexp(name,'_','split');
-vesnum = sscanf(name_parts{2},'v%d');
+vesnum = str2num(numparts{3});
 new_name = append(name_parts{1},'_',name_parts{2},'_',name_parts{3});
 
-Tau_data = Tau_data(:,1:6);
+fcontent3 = dir(fullfile(obj_folder, '*.csv')); %fcontent is a column vector of structures
+filename3 = fcontent2(b).name;
+[pathstr3,name3,ext3] = fileparts(filename3);
+
+name_parts3 = regexp(name3,'_','split');
+vesnum3 = str2num(name_parts3{3});
+
+if length(unique([vesnum vesnum3])) > 1
+    waitbar(0,f,sprintf('VESSEL MATCH ERROR: Object, vessel, and/or distance transform data are from different vesels (obj: Vessel %d Volume: Vessel %d Vessel: Vessel %d)',vesnum3,vesnum, vesnum2));
+    'ERROR: VESSEL MISMATCH (see error window)'
+    break
+end
+
 final_data = Tau_data;
 cortical_data = vessel_data;
 
-%% Export Intensity Data
+%% Export Object Data
 
-txt_name = append(folder_dir,'\',new_name,'_intensity_dist_data','.txt');
-xlsx_name = append(folder_dir,'\',new_name,'_intensity_dist_data', '.xlsx');
+txt_name = append(folder_dir,'/',new_name,'_',obj_type,'_dist_data','.txt');
+xlsx_name = append(folder_dir,'/',new_name,'_',obj_type,'_dist_data', '.xlsx');
 
 % % txt_name = append(final_name,ves_num,'.txt');
 % % xlsx_name = append(final_name,ves_num, '.xlsx');
@@ -431,6 +477,12 @@ writematrix(cortical_data,xlsx_name);
 else
 end
 
+%%
+close all;
+
+Tau_data = [];
+Distance_data = [];
+vessel_data = [];
 end
 
 waitbar(1,f,'Finished!');
@@ -438,4 +490,3 @@ waitbar(1,f,'Finished!');
 toc
 
 close(f)
-

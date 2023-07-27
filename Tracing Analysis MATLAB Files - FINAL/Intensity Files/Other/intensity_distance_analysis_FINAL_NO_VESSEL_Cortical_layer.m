@@ -15,7 +15,7 @@ clc; close all; clear all;
 
 % VESSEL DISTANCE TRANSFORM, CORTICAL, and INTENSITY COORDINATES:
 
-distance_folder = 'C:\Users\exx\Desktop\Zach - Active Analysis\2477\FINAL_coordinates';
+distance_folder = 'C:\Users\exx\Desktop\Zach - Active Analysis\2392\Transform_intensity_cortical_coordinates';
 
 % Input Imaris Image Dimentions (Get this from Edit -> Image Properties)
 
@@ -25,7 +25,7 @@ xlow = [ 0 ];
 
 % X-axis upper bound (in microns):
 
-xup = [ 2458 ];
+xup = [ 3663 ];
 
 % Y-axis lower bound (in microns):
 
@@ -33,29 +33,29 @@ ylow = [ 0 ];
 
 % Y-axis upper bound (in microns):
 
-yup = [ 3644 ];
+yup = [ 2459 ];
 
 % Z-axis lower bound (in microns):
 
-zlow = [ 3719 ];
+zlow = [ 3575 ];
 
 % Z-axis upper bound (in microns):
 
-zup = [ 4051 ];
+zup = [ 3930 ];
 
 % Fiji Image Dimensions:
 
 % Distance Transform X dimension:
 
-dist_xdim = [ 3956 ];
+dist_xdim = [ 5894 ];
 
 % Distance Transform Y dimension:
 
-dist_ydim = [ 5897 ];
+dist_ydim = [ 3958 ];
 
 % Number of Distance Transform  z-stack slices:
 
-dist_znum = [ 84 ];
+dist_znum = [ 71 ];
 
 % Save final data? What Format? Yes = [1]  No = [0]  (.txt only is recommended)
 
@@ -64,12 +64,12 @@ yesno = [    1       0    ];
 
 % Folder path for tau intensity output (ex. '/Users/zacharyhoglund/Desktop'):
 
-folder_dir = 'C:\Users\exx\Desktop\Zach - Active Analysis\2477\Intensity_distance_data';
+folder_dir = 'C:\Users\exx\Desktop\Zach - Active Analysis\2392\Intensity_distance_data';
 
 
 % Folder path for tau vessel cortical layer output (ex. '/Users/zacharyhoglund/Desktop'):
 
-folder_dir2 = 'C:\Users\exx\Desktop\Zach - Active Analysis\2477\vessel_cortical_data';
+folder_dir2 = 'C:\Users\exx\Desktop\Zach - Active Analysis\2392\vessel_cortical_data';
 
 % Data files will be exported as Human####_Vessel_##_int_dist_data
 
@@ -141,25 +141,8 @@ minx = min(vessel_data(:,1));
 miny = min(vessel_data(:,2));
 minz = min(vessel_data(:,3));
 
-% Find maximum axes values of vessel data for improvement of fit line. 
-maxx = max(vessel_data(:,1));
-maxy = max(vessel_data(:,2));
-maxz = max(vessel_data(:,3));
-
-% Find range of axes values of vessel data for improvement of fit line. 
-rangex = abs(maxx - minx);
-rangey = abs(maxy - miny);
-rangez = abs(maxz - minz);
-
-ranges = [1,rangex;2,rangey;3,rangez];
-
-ranges = sortrows(ranges,2,'descend');
-
-fitdata = [0 0 0];
-
-if ranges(1,1) == 1
-
 % Finds values of coefficients for polynomial equation of best fit line.
+fitdata = [0 0 0];
 
 % finds best fit line for X-Y plane
 fxy = fit((vessel_data(:,1)-minx),(vessel_data(:,2)-miny),'poly1');
@@ -182,65 +165,6 @@ y_fit = y_fit + miny;
 z_fit = z_fit + minz;
 
 fitdata = [x_fit y_fit z_fit];
-
-end
-
-if ranges(1,1) == 2
-
-    % Finds values of coefficients for polynomial equation of best fit line.
-
-% finds best fit line for Y-X plane
-fyx = fit((vessel_data(:,2)-miny),(vessel_data(:,1)-minx),'poly1');
-
-% finds best fit line for Y-Z plane
-fyz = fit((vessel_data(:,2)-miny),(vessel_data(:,3)-minz),'poly1');
-
-% Get coefficients from equation output
-fyx_values = coeffvalues(fyx);
-fyz_values = coeffvalues(fyz);
-
-%fit_res_1 = (max(vessel_data(:,1)) - min(vessel_data(:,1)))/fit_res;
-
-y_fit = ((min(vessel_data(:,2))-miny-5):(max(vessel_data(:,2))-miny+5))';
-x_fit = fyx(y_fit);
-z_fit = fyz(y_fit);
-
-x_fit = x_fit + minx;
-y_fit = y_fit + miny;
-z_fit = z_fit + minz;
-
-fitdata = [x_fit y_fit z_fit];
-
-end
-
-if ranges(1,1) == 3
-
-    % Finds values of coefficients for polynomial equation of best fit line.
-
-% finds best fit line for Y-X plane
-fzx = fit((vessel_data(:,3)-minz),(vessel_data(:,1)-minx),'poly1');
-
-% finds best fit line for Y-Z plane
-fzy = fit((vessel_data(:,3)-minz),(vessel_data(:,2)-miny),'poly1');
-
-% Get coefficients from equation output
-fzx_values = coeffvalues(fzx);
-fzy_values = coeffvalues(fzy);
-
-%fit_res_1 = (max(vessel_data(:,1)) - min(vessel_data(:,1)))/fit_res;
-
-z_fit = ((min(vessel_data(:,3))-minz-5):(max(vessel_data(:,3))-minz+5))';
-x_fit = fzx(z_fit);
-y_fit = fzy(z_fit);
-
-x_fit = x_fit + minx;
-y_fit = y_fit + miny;
-z_fit = z_fit + minz;
-
-fitdata = [x_fit y_fit z_fit];
-
-end
-
 
 % Remove rows containing all zeros from best fit line dataset. 
 fitdata = fitdata(any(fitdata,2),any(fitdata,1));
@@ -292,20 +216,13 @@ fitdata = fit_data_imp(:,1:3);
 
 %% Plot Best Fit Line with Vessel Surface Data
 
-fcontent = dir(fullfile(distance_folder, '*.txt')); %fcontent is a column vector of structures
-filename = fcontent(h).name;
-[pathstr,name,ext] = fileparts(filename);
-
-name_parts = regexp(name,'_','split');
-vesnum = str2double(name_parts{3});
-
 % Plot the best fit line
-figure(h)
-scatter3(fitdata(:,1), fitdata(:,2), fitdata(:,3),500,'.','r');
+figure()
+scatter3(fitdata(:,1), fitdata(:,2), fitdata(:,3),0.3,'.','r');
 hold on
 
 % Plot the Blood vessel on same plot as best fit line.
-scatter3(vessel_data(1:20:end,1),vessel_data(1:20:end,2),vessel_data(1:20:end,3),'b','MarkerFaceAlpha',0.1,'MarkerEdgeAlpha',0.1);
+scatter3(vessel_data(:,1),vessel_data(:,2),vessel_data(:,3),0.3,vessel_data(:,3));
 hold on
 % % % vis_points(:,1) = randperm(max(Tau_data(:,1)),3);
 % % % vis_points(:,2) = randperm(max(Tau_data(:,2)),3);
@@ -317,14 +234,14 @@ zlabel('Z');
 axis equal
 grid on
 colormap(jet)
-title(sprintf('Centerline Plot: Vessel %g',vesnum));
+title('Vessel Only Plot');
 
 %%
-% figure()
-% scatter3(Tau_data(:,1),Tau_data(:,2),Tau_data(:,3),'MarkerFaceAlpha',0.1,'MarkerEdgeAlpha',0.1);
-% hold on
-% scatter3(vessel_data(:,1),vessel_data(:,2),vessel_data(:,3));
-% title('Tau + Vessel Plot');
+figure()
+scatter3(Tau_data(:,1),Tau_data(:,2),Tau_data(:,3),'MarkerFaceAlpha',0.1,'MarkerEdgeAlpha',0.1);
+hold on
+scatter3(vessel_data(:,1),vessel_data(:,2),vessel_data(:,3));
+title('Tau + Vessel Plot');
 
 %% Find Tau distance along Blood Vessel
 %waitbar(0.4,f,sprintf('Getting Distances for Vessel %d/%d: Finding Distance Along Vessel',h,k));
@@ -358,7 +275,7 @@ dist = zeros(length(Tau_data),1);
 
 % Find the nearest point in the best fit line dataset to each point in the
 % tau dataset. 
-near = knnsearch(fitdata(:,1:3),vessel_data(:,1:3),Distance="euclidean");
+near = knnsearch(fitdata(:,1:3),vessel_data(:,1:3),Distance="fasteuclidean");
 
 % Calculate arclength between the end of the best fit line and each nearest
 % point on the best fit line to get distance along the vessel. 
@@ -377,14 +294,14 @@ end
 vessel_data = sortrows(vessel_data,6);
 
 %% Export Data
-waitbar(0.9,f,sprintf('Getting Distances for Vessel %d/%d: Exporting Data',h,k));
+f = waitbar(0.9,sprintf('Getting Distances for Vessel %d/%d: Exporting Data',h,k));
 
 fcontent = dir(fullfile(distance_folder, '*.txt')); %fcontent is a column vector of structures
 filename = fcontent(h).name;
 [pathstr,name,ext] = fileparts(filename);
 
 name_parts = regexp(name,'_','split');
-vesnum = sscanf(name_parts{2},'v%d');
+vesnum = str2num(name_parts{3});
 new_name = append(name_parts{1},'_',name_parts{2},'_',name_parts{3});
 
 Tau_data = Tau_data(:,1:6);
@@ -393,8 +310,8 @@ cortical_data = vessel_data;
 
 %% Export Intensity Data
 
-txt_name = append(folder_dir,'\',new_name,'_intensity_dist_data','.txt');
-xlsx_name = append(folder_dir,'\',new_name,'_intensity_dist_data', '.xlsx');
+txt_name = append(folder_dir,'/',new_name,'intensity_dist_data','.txt');
+xlsx_name = append(folder_dir,'/',new_name,'intensity_dist_data', '.xlsx');
 
 % % txt_name = append(final_name,ves_num,'.txt');
 % % xlsx_name = append(final_name,ves_num, '.xlsx');
@@ -413,8 +330,8 @@ end
 
 %% Export Vessel Cortical Layer Data
 
-txt_name = append(folder_dir2,'\',new_name,'_vessel_cortical_data','.txt');
-xlsx_name = append(folder_dir2,'\',new_name,'_vessel_cortical_data', '.xlsx');
+txt_name = append(folder_dir2,'/',new_name,'vessel_cortical_data','.txt');
+xlsx_name = append(folder_dir2,'/',new_name,'vessel_cortical_data', '.xlsx');
 
 % % txt_name = append(final_name,ves_num,'.txt');
 % % xlsx_name = append(final_name,ves_num, '.xlsx');
@@ -431,6 +348,8 @@ writematrix(cortical_data,xlsx_name);
 else
 end
 
+
+close all;
 end
 
 waitbar(1,f,'Finished!');
